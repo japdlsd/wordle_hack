@@ -1,6 +1,6 @@
 # Wordle Hack: solver of Wordle
 
-This is a program which can play Worlde for you :)
+This is a program which can play Wordle for you :)
 
 ## Install (you don't have to, but if you insist ...)
 
