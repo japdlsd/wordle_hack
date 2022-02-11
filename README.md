@@ -2,7 +2,7 @@
 
 This is a program which can play Worlde for you :)
 
-## Install
+## Install (you don't have to, but if you insist ...)
 
 ```shell
 cd data
