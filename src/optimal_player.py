@@ -92,7 +92,7 @@ def main():
     print(f"Total 5 letters word count: {len(words)}")
 
     game_log = []
-    player = Player(words, selecting_strategy=lambda ws: most_reducing_subsample(ws, 10, 100))
+    player = Player(words, selecting_strategy=time_optimised)
     round_num = 0
     while True:
         round_num += 1
