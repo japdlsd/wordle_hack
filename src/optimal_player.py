@@ -1,6 +1,8 @@
 import math
 import random
 
+from tqdm import tqdm
+
 
 def random_selection(viable_words):
     return random.choice(list(viable_words))
@@ -9,7 +11,7 @@ def random_selection(viable_words):
 def most_reducing(viable_words):
     best_word = ""
     least_average_remaining = math.inf
-    for gnum, guess in enumerate(viable_words):
+    for gnum, guess in tqdm(enumerate(viable_words)):
         remaining_total = 0
         for truth in viable_words:
             pattern = eval_pattern(guess, truth)
@@ -25,12 +27,10 @@ def most_reducing(viable_words):
 
 def most_reducing_subsample(viable_words,
                             subsample_truth_count=1,
-                            subsample_word_count=100):
+                            subsample_word_count=500):
     best_word = ""
     least_average_remaining = math.inf
-    for gnum, guess in enumerate(viable_words):
-        if gnum % 100 == 0:
-            print(f"Processing guess #{gnum} {guess}")
+    for gnum, guess in tqdm(enumerate(viable_words), total=len(viable_words)):
         remaining_total = 0
         for truth in random.choices(list(viable_words), k=subsample_truth_count):
             pattern = eval_pattern(guess, truth)
@@ -92,7 +92,7 @@ def main():
     print(f"Total 5 letters word count: {len(words)}")
 
     game_log = []
-    player = Player(words, selecting_strategy=time_optimised)
+    player = Player(words, selecting_strategy=most_reducing_subsample)
     round_num = 0
     while True:
         round_num += 1
