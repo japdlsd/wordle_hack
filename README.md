@@ -2,20 +2,19 @@
 
 This is a program which can play Wordle for you :)
 
-## Install (you don't have to, but if you insist ...)
+## Install
 
-```shell
-cd data
-bash make_thesaurus.sh
+```bash
+mamba env create -f environment.yaml #@TODO add environment file
+mamba activate wordle
 
-pip install tqdm
+pip install -e .
 ```
 
 ## Usage
 
 ```shell
-cd src/
-python optimal_player.py
+wordle
 ```
 
 1. Run the program
