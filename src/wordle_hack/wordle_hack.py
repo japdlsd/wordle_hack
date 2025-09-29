@@ -10,7 +10,7 @@ def main():
     argh.dispatch_commands([play, first_word])
 
 
-def play():
+def play(inital_guess: str | None = None):
     words_filename = Path(__file__).parent.parent.parent / "data/words5.txt"
     excluded_filename = Path(__file__).parent.parent.parent / "data/excluded.txt"
 
@@ -26,11 +26,15 @@ def play():
     print(f"Total 5 letters word count: {len(words)}")
 
     game_log = []
-    player = Player(words, selecting_strategy=most_reducing_subsample)
+    # player = Player(words, selecting_strategy=most_reducing_subsample)
+    player = Player(words, selecting_strategy=most_reducing)
     round_num = 0
     while True:
         round_num += 1
-        guess = player.next_guess()
+        if round_num == 1 and inital_guess is not None and inital_guess in words:
+            guess = inital_guess
+        else:
+            guess = player.next_guess()
         print(f"Player's guess on round #{round_num} is: {guess}")
         result = input(
             "Type the result "
@@ -93,6 +97,11 @@ def most_reducing(viable_words, avg_upper_bound=None):
         least_average_remaining = avg_upper_bound
 
     pbar = tqdm(total=len(viable_words) ** 2)
+
+    # force the first word to try to be "crane"
+    if "crane" in viable_words:
+        viable_words.remove("crane")
+        viable_words = ["crane"] + list(viable_words)
 
     for gnum, guess in enumerate(viable_words):
         remaining_total = 0
