@@ -7,6 +7,8 @@ This is a program which can play Wordle for you :)
 ```shell
 cd data
 bash make_thesaurus.sh
+
+pip install tqdm
 ```
 
 ## Usage
