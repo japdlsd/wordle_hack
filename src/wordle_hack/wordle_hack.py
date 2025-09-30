@@ -10,7 +10,7 @@ def main():
     argh.dispatch_commands([play, first_word])
 
 
-def play(inital_guess: str | None = None):
+def play(inital_guess: str | None = "ousia"):
     words_filename = Path(__file__).parent.parent.parent / "data/words5.txt"
     excluded_filename = Path(__file__).parent.parent.parent / "data/excluded.txt"
 
@@ -27,7 +27,7 @@ def play(inital_guess: str | None = None):
 
     game_log = []
     # player = Player(words, selecting_strategy=most_reducing_subsample)
-    player = Player(words, selecting_strategy=most_reducing)
+    player = Player(words, selecting_strategy=most_reducing_fast)
     round_num = 0
     while True:
         round_num += 1
@@ -81,7 +81,7 @@ def first_word(avg_upper_bound: float | None = None):
 
     print(f"Total 5 letters word count: {len(words)}")
     random.shuffle(words)
-    best_word = most_reducing(words, avg_upper_bound=avg_upper_bound)
+    best_word = most_reducing_fast(words, avg_upper_bound=avg_upper_bound)
     print(f"Best first word is: {best_word}")
 
 
@@ -110,6 +110,49 @@ def most_reducing(viable_words, avg_upper_bound=None):
             for word in viable_words:
                 if pattern == eval_pattern(word, truth):
                     remaining_total += 1
+            if remaining_total >= least_average_remaining * len(viable_words):
+                # no need to continue, this guess is already worse
+                pbar.update(len(viable_words) - tnum)
+                break
+            pbar.update(1)
+        average_remaining = remaining_total / len(viable_words)
+        if least_average_remaining > average_remaining:
+            best_word = guess
+            least_average_remaining = average_remaining
+            print(f"New best word: {best_word} with {least_average_remaining:.2f} avg")
+        pbar.set_description(
+            "{best_word} with {least_average_remaining:.2f} avg (last search: '{guess}')".format(
+                best_word=best_word,
+                least_average_remaining=least_average_remaining,
+                guess=guess,
+            )
+        )
+        pbar.refresh()
+    return best_word
+
+
+def most_reducing_fast(viable_words, **kwargs):
+    # first, we compute for each truth the number of words that would produce each pattern
+    pattern_counts_per_truth = {}
+    for truth in tqdm(
+        viable_words, total=len(viable_words), desc="Counting patterns per truth"
+    ):
+        pattern_counts = {}
+        for word in viable_words:
+            pattern = eval_pattern(word, truth)
+            pattern_counts[pattern] = 1 + pattern_counts.get(pattern, 0)
+        pattern_counts_per_truth[truth] = pattern_counts
+
+    pbar = tqdm(total=len(viable_words) ** 2)
+
+    best_word = "?????"
+    least_average_remaining = math.inf
+
+    for gnum, guess in enumerate(viable_words):
+        remaining_total = 0
+        for tnum, truth in enumerate(viable_words):
+            pattern = eval_pattern(guess, truth)
+            remaining_total += pattern_counts_per_truth[truth].get(pattern, 0)
             if remaining_total >= least_average_remaining * len(viable_words):
                 # no need to continue, this guess is already worse
                 pbar.update(len(viable_words) - tnum)
